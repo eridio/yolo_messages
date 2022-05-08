@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+
+
+    <script>
+    function send_json(){
+        let json = `{"username":"patoche 0.5562481824171075","cipherText":[140,63,63,21,214,111,46,170,248,222,121,53,98,57,165,109,163,20,22,88,34,17,200,141,156,88,27,103,189,26,204,137,61,219,128,5,149,190,214,40,158,201,59,176,190,27,38,161,116,141,239,234,42,244,85,100,114,119,141,228,186,172,73,175,8,172,241,119,115,165,89,237],"key":[99,211,78,11,60,127,219,177,9,83,143,122,248,196,150,246,94,197,169,51,130,183,164,41,14,147,156,123,54,5,108,74,96,66,31,231,171,155,149,205,74,94,182,26,85,25,138,2],"nonce":"JlK2aepvGzbk","conversationName":"patoche 0.38794364776524826","date":"07/05/2022"}`
+        //let json_to_send = JSON.parse(json)
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", `https://localhost:4201/store_messages`, true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.send(((json)));
+    }
+
+    function getData() {
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", `http://localhost:4201/get_messages`, true);
+    xhr.onload = () => {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                console.log(xhr.statusText);
+                parseData(xhr.responseText);
+            } else {
+                console.error(xhr.statusText);
+            }
+        }
+    };
+    xhr.onerror = () => {
+        console.error(xhr.statusText);
+    };
+    xhr.send(null);
+}
+function parseData(response) {
+    console.log(response)
+    console.log(JSON.parse(response))
+}
+
+
+    </script>
+    <button onclick="send_json()" >send</button>
+
+    <button onclick="getData()" >GET</button>
+</body>
+</html> 
