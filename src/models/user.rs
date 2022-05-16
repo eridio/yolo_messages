@@ -5,9 +5,20 @@ use validator_derive::Validate;
 use sqlx::Database;
 
 
+
+#[derive(Deserialize,Serialize,Debug ,sqlx::FromRow)]
+pub struct MessageBundleFromWeb {
+    pub username : String,
+    pub cipherText : Vec<u8>,
+    pub key : Vec<u8>,
+    pub nonce :String,
+    pub conversationName : String,
+    pub date : String,
+}
+
 #[derive(Deserialize,Serialize,Debug ,sqlx::FromRow)]
 pub struct MessageBundle {
-    pub uuid : Uuid,
+    pub uuid1 : Uuid,
     pub username : String,
     pub cipherText : Vec<u8>,
     pub key : Vec<u8>,
@@ -19,12 +30,25 @@ pub struct MessageBundle {
 
 #[derive(Deserialize,Serialize,Debug ,sqlx::FromRow)]
 pub struct MessageBundleStringify {
-    pub uuid : Uuid,
+    pub uuid1 : Uuid,
     pub username : String,
     pub cipherText : String,
     pub key :String,
     pub nonce :String,
     pub conversationName : String,
+    pub date : String,
+}
+
+
+#[derive(Deserialize,Serialize,Debug ,sqlx::FromRow)]
+pub struct MessageBundleStringify2 {
+    pub id : i32,
+    pub uuid1 : Uuid,
+    pub username : String,
+    pub ciphertext : String,
+    pub key :String,
+    pub nonce :String,
+    pub conversationname : String,
     pub date : String,
 }
 

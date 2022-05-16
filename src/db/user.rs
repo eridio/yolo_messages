@@ -1,5 +1,5 @@
 use crate::{config::crypto::CryptoService,
-    models::user::{User,MessageBundle,MessageBundleStringify},
+    models::user::{User,MessageBundle,MessageBundleStringify,MessageBundleStringify2},
     errors::AppError,
     errors::AppErrorCode,
     };
@@ -48,9 +48,10 @@ impl UserRepository {
         Ok(maybe_user)
     }
 
-    pub async fn store_bundle_db(&self, uuid : Uuid,message_to_store : MessageBundle )-> Result<MessageBundle>{
+    pub async fn store_bundle_db(&self, uuid : Uuid,message_to_store : MessageBundle )-> Result<MessageBundleStringify>{
 
-        let bundle1 = sqlx::query_as::<_, MessageBundle>("insert into yolo_message (uuid1,username ,cipherText,key,nonce,conversationName,date) values ($1,$2,$3,$4,$5,$6,$7) returning *")
+        println!("{:?}", message_to_store);
+        let bundle1 = sqlx::query_as::<_, MessageBundleStringify>("insert into yolo_message (uuid1,username,cipherText,key,nonce,conversationName,date) values ($1,$2,$3,$4,$5,$6,$7) returning *")
         .bind(uuid)
         .bind(format!("{:?}",message_to_store.username))
         .bind(format!("{:?}",message_to_store.cipherText))
@@ -60,29 +61,46 @@ impl UserRepository {
         .bind(format!("{:?}",message_to_store.date))
         .fetch_one(&*self.pool)
         .await?;
-        Ok(bundle1)
+        println!("{:?}" , bundle1);
+        let bundle_to_return_to_user = MessageBundleStringify {
+            uuid1: bundle1.uuid1,
+            username : bundle1.username,
+            cipherText : (bundle1.cipherText),
+            key: (bundle1.key),
+            nonce : bundle1.nonce,
+            conversationName : bundle1.conversationName,
+            date : bundle1.date
+        };
+        Ok(bundle_to_return_to_user)
     }
 
 
-    pub async fn get_messages_db(&self , id : Uuid) -> Result<MessageBundle> {
+    pub async fn get_messages_db(&self , id : Uuid) -> Result<Vec<MessageBundleStringify2>> {
+        println!("dans get messages");
 
-        let bundle_to_return = sqlx::query_as::<_, MessageBundleStringify>("select (uuid1,username ,cipherText,key,conversationName,data) from yolo_message where uuid1 = $1 ;")//"select * from yolo_bundle where name_ = '$1';")
-        .bind(format!("{:?}",id))
-        .fetch_optional(&*self.pool)
+        let bundle_to_return = sqlx::query_as::<_, MessageBundleStringify2>("select * from yolo_message where uuid1 = $1 ;")//"select * from yolo_bundle where name_ = '$1';")
+        .bind(id)
+        .fetch_all(&*self.pool)
         .await;
-    let bundle_to_return_stringify = bundle_to_return.unwrap().unwrap();
+        println!("{:?}", bundle_to_return);
+    
+    let bundle_to_return_stringify = bundle_to_return.unwrap();
 
-        let bundle_to_return_to_user = MessageBundle {
-            uuid: bundle_to_return_stringify.uuid,
-            username : bundle_to_return_stringify.username,
-            cipherText : parse_bundle_arguments(bundle_to_return_stringify.cipherText),
-            key: parse_bundle_arguments(bundle_to_return_stringify.key),
-            nonce : bundle_to_return_stringify.nonce,
-            conversationName : bundle_to_return_stringify.conversationName,
-            date : bundle_to_return_stringify.date
-        };
+    println!("{:?}", bundle_to_return_stringify);
 
-    Ok(bundle_to_return_to_user)
+        // let bundle_to_return_to_user = MessageBundle {
+        //     uuid1: id,
+        //     username : bundle_to_return_stringify.username,
+        //     cipherText : parse_bundle_arguments(bundle_to_return_stringify.ciphertext),
+        //     key: parse_bundle_arguments(bundle_to_return_stringify.key),
+        //     nonce : bundle_to_return_stringify.nonce,
+        //     conversationName : bundle_to_return_stringify.conversationname,
+        //     date : bundle_to_return_stringify.date
+        // };
+
+        // println!("{:?}", bundle_to_return_to_user);
+
+    Ok(bundle_to_return_stringify)
        
     }
 }

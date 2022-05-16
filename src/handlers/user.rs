@@ -3,7 +3,7 @@ use crate::{db,
             config::crypto::CryptoService,
             db::user::UserRepository,
             errors::AppError,
-            models::user::{MessageBundle}};
+            models::user::{MessageBundle,MessageBundleFromWeb}};
 
 use actix_web::{web::Data,web::Json,web::Form, HttpResponse,HttpRequest,Responder,HttpMessage,web::Query};
 use color_eyre::Result;
@@ -22,10 +22,10 @@ pub async fn test (req : HttpRequest) -> impl Responder{
 
 
 //user : AuthenticatedUser,repository: UserRepository, 
-pub async fn store_messages (user : AuthenticatedUser,repository: UserRepository,info : Json<MessageBundle>) -> impl Responder{
-   
+pub async fn store_messages (user : AuthenticatedUser,repository: UserRepository,info : Json<MessageBundleFromWeb>) -> impl Responder{
+   println!("{:?}", info);
     let message_bundle = MessageBundle {
-        uuid : user.0,
+        uuid1 : user.0,
         username : info.username.clone(),
         cipherText : info.cipherText.clone(),
         key : info.key.clone(),
@@ -33,8 +33,9 @@ pub async fn store_messages (user : AuthenticatedUser,repository: UserRepository
         nonce: info.nonce.clone(),
         date : info.date.clone()
     };
+    println!("{:?}" , message_bundle);
 
-    let response_from_db = repository.store_bundle_db(user.0, message_bundle).await.unwrap();
+    let response_from_db = repository.store_bundle_db(user.0, message_bundle).await;
 
     HttpResponse::Ok().body("")
 }
@@ -42,7 +43,6 @@ pub async fn store_messages (user : AuthenticatedUser,repository: UserRepository
 pub async fn get_messages(user:AuthenticatedUser, repository : UserRepository)  -> impl Responder{
 
     let json_to_return = repository.get_messages_db(user.0).await.unwrap();
-
 
     HttpResponse::Ok().json(json_to_return)
 }
